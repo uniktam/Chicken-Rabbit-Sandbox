@@ -3,528 +3,436 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>大魔法師的試煉：雞兔同籠自由沙盒</title>
+    <title>大魔法師的試煉：雞兔同籠進階沙盒</title>
     <style>
         /* ==========================================================================
-           1. 基礎與全局設定 (Base & Global)
+           1. 基礎與全局設定
            ========================================================================== */
         * {
             box-sizing: border-box;
-            font-family: 'Comic Sans MS', 'Microsoft JhengHei', sans-serif; /* 卡通字體風格 */
-            user-select: none; /* 防止小朋友連點時選取文字 */
+            font-family: 'Comic Sans MS', 'Microsoft JhengHei', sans-serif;
+            user-select: none;
         }
 
         body {
-            margin: 0;
-            padding: 20px;
-            background-color: #7ed957; /* 亮綠色草地背景 */
+            margin: 0; padding: 20px;
+            background-color: #7ed957;
             background-image: radial-gradient(#54b33d 10%, transparent 10%);
-            background-size: 20px 20px; /* 創造草地點點質感 */
+            background-size: 20px 20px;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
         }
 
         .container {
-            width: 100%;
-            max-width: 1000px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            width: 100%; max-width: 1050px;
+            display: flex; flex-direction: column; gap: 15px;
         }
 
         /* ==========================================================================
-           2. 木板 UI 風格共用類別 (Wooden Board Style)
+           2. 木板 UI 風格共用類別
            ========================================================================== */
         .wood-board {
             background-color: #f4a460;
-            border: 4px solid #8b4513;
-            border-radius: 15px;
+            border: 4px solid #8b4513; border-radius: 15px;
             box-shadow: 0 6px 0 #8b4513, 0 10px 10px rgba(0,0,0,0.3);
-            padding: 15px 20px;
-            color: #4a2511;
+            padding: 15px 20px; color: #4a2511;
         }
 
         /* ==========================================================================
-           3. 佈局區塊 (Layout: Header, Main, Sidebar, Canvas, Footer)
+           3. 佈局區塊
            ========================================================================== */
-        header {
-            text-align: center;
-        }
-        
+        header { text-align: center; }
         header h1 {
-            margin: 0 0 10px 0;
-            font-size: 28px;
-            color: #fff;
+            margin: 0 0 10px 0; font-size: 28px; color: #fff;
             text-shadow: 2px 2px 0 #8b4513, -2px -2px 0 #8b4513, 2px -2px 0 #8b4513, -2px 2px 0 #8b4513;
         }
-
         header h2 {
-            margin: 0;
-            font-size: 22px;
-            background: #fff;
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            border: 2px dashed #8b4513;
+            margin: 0; font-size: 22px; background: #fff;
+            display: inline-block; padding: 5px 15px;
+            border-radius: 20px; border: 2px dashed #8b4513;
         }
 
-        .main-content {
-            display: flex;
-            gap: 15px;
-            min-height: 400px;
-        }
-
-        .sidebar {
-            flex: 0 0 200px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
+        .main-content { display: flex; gap: 15px; min-height: 420px; }
+        .sidebar { flex: 0 0 200px; display: flex; flex-direction: column; gap: 15px; }
         .canvas {
-            flex: 1;
-            background-color: rgba(255, 255, 255, 0.4);
-            border: 4px dashed #54b33d;
-            border-radius: 15px;
-            padding: 20px;
-            display: flex;
-            flex-wrap: wrap; /* 自動換行排列動物 */
-            align-content: flex-start;
-            gap: 15px;
-            overflow-y: auto;
+            flex: 1; background-color: rgba(255, 255, 255, 0.4);
+            border: 4px dashed #54b33d; border-radius: 15px; padding: 20px;
+            display: flex; flex-wrap: wrap; align-content: flex-start; gap: 15px; overflow-y: auto;
         }
 
-        footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 24px;
-            font-weight: bold;
-        }
+        footer { display: flex; flex-direction: column; gap: 10px; font-size: 20px; font-weight: bold; }
+        
+        /* 隱藏區塊用的 class */
+        .hidden { display: none !important; }
 
-        .status-group {
-            display: flex;
-            gap: 30px;
+        /* 階段面板設計 */
+        .panel {
+            display: flex; justify-content: space-between; align-items: center;
+            width: 100%; background: rgba(255,255,255,0.3); padding: 10px; border-radius: 10px;
         }
 
         /* ==========================================================================
-           4. 按鈕與互動元素 (Buttons)
+           4. 按鈕與輸入框
            ========================================================================== */
         button {
-            background-color: #ffcc00;
-            border: 3px solid #d2691e;
-            border-radius: 10px;
-            padding: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #8b4513;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #d2691e;
-            transition: all 0.1s;
+            background-color: #ffcc00; border: 3px solid #d2691e; border-radius: 10px;
+            padding: 10px; font-size: 16px; font-weight: bold; color: #8b4513;
+            cursor: pointer; box-shadow: 0 4px 0 #d2691e; transition: all 0.1s;
         }
-
-        button:active:not(:disabled) {
-            transform: translateY(4px);
-            box-shadow: 0 0 0 #d2691e;
-        }
-
-        button:hover:not(:disabled) {
-            background-color: #ffe066;
-        }
-
+        button:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #d2691e; }
+        button:hover:not(:disabled) { background-color: #ffe066; }
         button:disabled {
-            background-color: #cccccc;
-            border-color: #999999;
-            color: #666666;
-            box-shadow: 0 4px 0 #999999;
-            cursor: not-allowed;
-        }
-
-        .btn-finish {
-            background-color: #00cc00;
-            border-color: #006600;
-            color: white;
-            box-shadow: 0 4px 0 #006600;
-            font-size: 22px;
-            padding: 10px 20px;
+            background-color: #cccccc; border-color: #999999; color: #666666;
+            box-shadow: 0 4px 0 #999999; cursor: not-allowed;
         }
         
-        /* 過關按鈕發亮動畫 */
-        .btn-finish.ready {
-            animation: pulse 1.5s infinite;
-            background-color: #39ff14;
-            border-color: #228b22;
-            color: #004d00;
-            box-shadow: 0 4px 0 #228b22, 0 0 15px #39ff14;
-        }
+        .btn-green { background-color: #66cc33; border-color: #336600; box-shadow: 0 4px 0 #336600; color: white;}
+        .btn-green:hover:not(:disabled) { background-color: #85e053; }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        input[type="number"] {
+            width: 70px; font-size: 20px; font-weight: bold; text-align: center;
+            border: 3px solid #8b4513; border-radius: 8px; padding: 5px;
+            background: #fff; color: #d2691e;
         }
+        /* 隱藏箭頭 */
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
         /* ==========================================================================
-           5. 純 CSS 動物設計 (Animal CSS Art)
+           5. 純 CSS 動物設計
            ========================================================================== */
         .animal-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 60px;
-            height: 90px;
-            cursor: pointer;
-            transition: transform 0.2s;
+            display: flex; flex-direction: column; align-items: center;
+            width: 60px; height: 90px; cursor: pointer; transition: transform 0.2s;
         }
-
-        .animal-wrapper:hover {
-            transform: scale(1.1);
-        }
-
-        /* 白圓形代表頭 */
+        .animal-wrapper.interactive:hover { transform: scale(1.1); }
         .head {
-            width: 50px;
-            height: 50px;
-            background-color: white;
-            border: 3px solid #4a2511;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 28px;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
-            z-index: 2;
+            width: 50px; height: 50px; background-color: white; border: 3px solid #4a2511;
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-size: 28px; box-shadow: 0 3px 5px rgba(0,0,0,0.2); z-index: 2;
         }
-
-        /* 腳的容器 */
-        .legs-container {
-            display: flex;
-            gap: 8px;
-            height: 30px;
-            margin-top: -5px; /* 讓腳連接到頭的下方 */
-            z-index: 1;
-        }
-
-        /* 橘色線條代表腳 */
-        .leg {
-            width: 6px;
-            height: 100%;
-            background-color: #ff8c00;
-            border: 1px solid #c96200;
-            border-radius: 3px;
-        }
+        .legs-container { display: flex; gap: 8px; height: 30px; margin-top: -5px; z-index: 1; }
+        .leg { width: 6px; height: 100%; background-color: #ff8c00; border: 1px solid #c96200; border-radius: 3px; }
 
         /* ==========================================================================
-           6. 狀態數字顏色防呆邏輯 (Status Colors)
+           6. 狀態文字顏色
            ========================================================================== */
-        .status-text { color: black; }
-        .status-perfect { color: #39ff14; text-shadow: 1px 1px 2px #000; } /* 亮綠色加粗 ✨ */
-        .status-warning { color: #ff3333; text-shadow: 1px 1px 2px #000; } /* 紅色警告 ❌ */
+        .status-perfect { color: #008000; text-shadow: 1px 1px 0px #fff; }
+        .status-warning { color: #cc0000; text-shadow: 1px 1px 0px #fff; }
+        .leg-pool { color: #cc0000; font-size: 26px; }
 
         /* ==========================================================================
-           7. 彈出視窗 (Modal)
+           7. 彈出視窗 Modal
            ========================================================================== */
         .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: none; /* 預設隱藏 */
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000;
         }
-
-        .modal-content {
-            text-align: center;
-            max-width: 500px;
-        }
-
-        .modal-content h2 {
-            font-size: 32px;
-            color: #ffcc00;
-            text-shadow: 2px 2px #8b4513;
-        }
-
-        .modal-content p {
-            font-size: 24px;
-        }
+        .modal-content { text-align: center; max-width: 500px; padding: 30px; }
+        .modal-content h2 { font-size: 36px; color: #ffcc00; text-shadow: 2px 2px #8b4513; margin-top: 0;}
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- 頂部看板 -->
     <header class="wood-board">
-        <h1>✨ 大魔法師的試煉：雞兔同籠自由沙盒 ✨</h1>
-        <h2>🎯 目標：農場裡有 <span id="target-heads">0</span> 個頭，<span id="target-legs">0</span> 隻腳。</h2>
+        <h1>✨ 雞兔同籠：魔法師的假設法試煉 ✨</h1>
+        <h2>🎯 目標：農場裡有 <span id="target-heads">0</span> 個頭，共 <span id="target-legs">0</span> 隻腳。</h2>
     </header>
 
-    <!-- 中間佈局 -->
     <div class="main-content">
         <!-- 左側工具箱 -->
         <aside class="sidebar wood-board">
-            <button onclick="addHead()">➕ 召喚一個頭</button>
-            <button onclick="makeAllChickens()">🐔 全體變小雞</button>
-            <button onclick="clearCanvas()">🗑️ 清空重來</button>
-            <div style="flex-grow: 1;"></div> <!-- 推擠排版 -->
-            <button onclick="startNewGame()">🎲 換一題</button>
+            <button id="btn-add-head" onclick="addHead()">➕ 召喚一個頭</button>
+            <button id="btn-rm-head" onclick="removeHead()">➖ 移除一個頭</button>
+            <hr style="width: 100%; border: 1px dashed #8b4513;">
+            <button id="btn-make-chickens" onclick="triggerPhaseCalc()" disabled>🐔 全體變小雞</button>
+            <div style="flex-grow: 1;"></div>
+            <button onclick="startNewGame()">🎲 換一題重來</button>
         </aside>
 
         <!-- 中央草地 -->
-        <section class="canvas" id="canvas">
-            <!-- 動物會由 JS 動態生成在這裡 -->
-        </section>
+        <section class="canvas" id="canvas"></section>
     </div>
 
-    <!-- 底部狀態列 -->
+    <!-- 底部狀態列 (動態切換面板) -->
     <footer class="wood-board">
-        <div class="status-group">
+        
+        <!-- 階段 1：放置頭部 -->
+        <div id="panel-setup" class="panel">
+            <div>🐾 目前草地頭數：<span id="current-heads">0</span> / <span id="display-target-heads">0</span></div>
+            <div style="color:#4a2511;">👉 請先放對頭的數量，才能使用「全體變小雞」魔法！</div>
+        </div>
+
+        <!-- 階段 2：計算用掉與剩餘的腳 -->
+        <div id="panel-calc" class="panel hidden">
             <div>
-                🐾 目前頭數：
-                <span id="current-heads" class="status-text">0</span> / <span id="display-target-heads">0</span>
-                <span id="icon-heads"></span>
+                ✏️ 假設全是小雞，用掉的腳數：<input type="number" id="input-used"> 
+                剩餘腳數：<input type="number" id="input-rem">
             </div>
-            <div>
-                🐾 目前腳數：
-                <span id="current-legs" class="status-text">0</span> / <span id="display-target-legs">0</span>
-                <span id="icon-legs"></span>
+            <button class="btn-green" onclick="verifyCalculation()">✨ 確認計算</button>
+        </div>
+
+        <!-- 階段 3：分配腳與輸入最終答案 -->
+        <div id="panel-distribute" class="panel hidden" style="flex-direction: column; gap: 15px;">
+            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                <div>📦 剩餘腳數池：<strong class="leg-pool" id="display-pool">0</strong> 隻腳 (點擊小雞，一次發 2 隻腳)</div>
+                <div style="font-size: 16px;">💡 提示：點擊小雞變兔子，點擊兔子退回腳。</div>
+            </div>
+            
+            <!-- 最終答案區 -->
+            <div id="final-answer-area" class="hidden" style="width: 100%; background: #fff; padding: 10px; border-radius: 10px; display: flex; justify-content: center; gap: 20px; align-items: center;">
+                <span>🐰 兔子數量：<input type="number" id="ans-rabbits"></span>
+                <span>🐔 小雞數量：<input type="number" id="ans-chickens"></span>
+                <button class="btn-green" onclick="verifyFinalAnswer()">🏆 提交答案</button>
             </div>
         </div>
-        <button id="btn-finish" class="btn-finish" onclick="showModal()" disabled>✨ 完成任務 ✨</button>
+
     </footer>
 </div>
 
-<!-- 過關結算 Modal -->
+<!-- 過關 Modal -->
 <div class="modal-overlay" id="success-modal">
     <div class="wood-board modal-content">
-        <h2>🎉 任務完成！太棒了！ 🎉</h2>
-        <p>你自己找出了答案！</p>
-        <p>農場裡有 <strong id="result-rabbits" style="color: #ff6600;">0</strong> 隻兔子 🐰 <br>和 <strong id="result-chickens" style="color: #ff6600;">0</strong> 隻小雞 🐔！</p>
-        <button onclick="closeModalAndNext()" style="margin-top: 15px; font-size: 22px;">挑戰下一題 🎲</button>
+        <h2>🎉 魔法試煉通過！ 🎉</h2>
+        <p>你完美運用了「假設法」找出答案！</p>
+        <p>農場裡確實有 <strong id="res-rabbit" style="color: #ff6600;">0</strong> 隻兔子和 <strong id="res-chicken" style="color: #ff6600;">0</strong> 隻小雞！</p>
+        <button class="btn-green" onclick="closeModalAndNext()" style="font-size: 22px; margin-top: 15px;">挑戰下一題 🎲</button>
     </div>
 </div>
 
 <script>
     /* ==========================================================================
        狀態管理 (State Management)
-       這裡定義了遊戲的核心資料，UI 的渲染完全依賴這些狀態。
+       phase: 'setup' (放頭) -> 'calc' (算腳) -> 'distribute' (發腳)
        ========================================================================== */
     let state = {
+        phase: 'setup', 
         targetHeads: 0,
         targetLegs: 0,
-        // animals 陣列儲存草地上的動物狀態。值可以為: 'blank' (0腳), 'chicken' (2腳), 'rabbit' (4腳)
-        animals: []
+        animals: [], // 'blank', 'chicken', 'rabbit'
+        remainingLegPool: 0 
     };
 
     /* ==========================================================================
-       核心邏輯：隨機生成合法題目 (Core Logic)
-       確保題目一定有整數解。
+       1. 遊戲初始化與產生題目
        ========================================================================== */
     function generatePuzzle() {
-        // 1. 隨機生成頭數 (H)：5 到 20 之間的隨機整數
-        state.targetHeads = Math.floor(Math.random() * 16) + 5; 
-        
-        // 2. 隨機生成兔子真實數量 (R)：1 到 (H-1) 之間的隨機整數 (確保至少有一雞一兔)
+        state.targetHeads = Math.floor(Math.random() * 10) + 5; // 5~14個頭，降低運算負擔
         const trueRabbits = Math.floor(Math.random() * (state.targetHeads - 1)) + 1;
-        
-        // 3. 計算目標腳數 (L)：小雞腳數 + 兔子腳數
         const trueChickens = state.targetHeads - trueRabbits;
         state.targetLegs = (trueChickens * 2) + (trueRabbits * 4);
 
-        // 更新畫面上的目標文字
+        // 更新 UI 目標顯示
         document.getElementById('target-heads').textContent = state.targetHeads;
-        document.getElementById('target-legs').textContent = state.targetLegs;
         document.getElementById('display-target-heads').textContent = state.targetHeads;
-        document.getElementById('display-target-legs').textContent = state.targetLegs;
+        document.getElementById('target-legs').textContent = state.targetLegs;
+    }
+
+    function startNewGame() {
+        state.phase = 'setup';
+        state.animals = [];
+        state.remainingLegPool = 0;
+        generatePuzzle();
+        
+        // 重置所有輸入框
+        document.getElementById('input-used').value = '';
+        document.getElementById('input-rem').value = '';
+        document.getElementById('ans-rabbits').value = '';
+        document.getElementById('ans-chickens').value = '';
+
+        // UI 佈局切換
+        togglePanels('panel-setup');
+        document.getElementById('btn-add-head').disabled = false;
+        document.getElementById('btn-rm-head').disabled = false;
+        document.getElementById('final-answer-area').classList.add('hidden');
+        
+        renderCanvas();
     }
 
     /* ==========================================================================
-       草地渲染機制 (Rendering Engine)
-       根據 state.animals 陣列的內容，純粹地產生 HTML 結構。
+       2. UI 面板切換與渲染機制
        ========================================================================== */
+    function togglePanels(activePanelId) {
+        ['panel-setup', 'panel-calc', 'panel-distribute'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+        document.getElementById(activePanelId).classList.remove('hidden');
+    }
+
     function renderCanvas() {
         const canvas = document.getElementById('canvas');
-        canvas.innerHTML = ''; // 先清空草地
+        canvas.innerHTML = ''; 
 
         state.animals.forEach((animalType, index) => {
-            // 建立動物的外層容器
             const wrapper = document.createElement('div');
             wrapper.className = 'animal-wrapper';
-            // 綁定點擊事件，傳入動物的索引值
-            wrapper.onclick = () => toggleAnimal(index);
+            
+            // 只有在 distribute 階段，且動物是雞或兔時，才允許點擊互動
+            if (state.phase === 'distribute') {
+                wrapper.classList.add('interactive');
+                wrapper.onclick = () => toggleAnimal(index);
+            }
 
-            // 建立頭部 (白圓形)
             const head = document.createElement('div');
             head.className = 'head';
-            
-            // 建立腳的容器
             const legsContainer = document.createElement('div');
             legsContainer.className = 'legs-container';
 
-            // 根據動物種類設定 Emoji 和 腳的數量
             let legsCount = 0;
-            if (animalType === 'blank') {
-                head.textContent = ''; // 空白頭
-                legsCount = 0;
-            } else if (animalType === 'chicken') {
-                head.textContent = '🐔';
-                legsCount = 2;
-            } else if (animalType === 'rabbit') {
-                head.textContent = '🐰';
-                legsCount = 4;
-            }
+            if (animalType === 'blank') { head.textContent = ''; legsCount = 0; }
+            else if (animalType === 'chicken') { head.textContent = '🐔'; legsCount = 2; }
+            else if (animalType === 'rabbit') { head.textContent = '🐰'; legsCount = 4; }
 
-            // 產生橘色線條的腳
             for (let i = 0; i < legsCount; i++) {
                 const leg = document.createElement('div');
                 leg.className = 'leg';
                 legsContainer.appendChild(leg);
             }
 
-            // 組裝 DOM
             wrapper.appendChild(head);
             wrapper.appendChild(legsContainer);
             canvas.appendChild(wrapper);
         });
 
-        // 每次渲染完動物，同步更新底部的數字和防呆顏色
-        updateStats();
+        updateSetupStatus();
+        if(state.phase === 'distribute') {
+            document.getElementById('display-pool').textContent = state.remainingLegPool;
+            checkRevealFinalAnswer();
+        }
     }
 
     /* ==========================================================================
-       動物狀態切換機制 (Interaction Mechanics)
-       點擊：空白頭 -> 小雞 -> 兔子 -> 退化回小雞
+       3. 階段一：Setup (放頭)
+       ========================================================================== */
+    function addHead() {
+        if (state.animals.length < 20) { // 設定上限防呆
+            state.animals.push('blank');
+            renderCanvas();
+        }
+    }
+
+    function removeHead() {
+        if (state.animals.length > 0) {
+            state.animals.pop();
+            renderCanvas();
+        }
+    }
+
+    function updateSetupStatus() {
+        const currentHeads = state.animals.length;
+        const elHeads = document.getElementById('current-heads');
+        elHeads.textContent = currentHeads;
+
+        const btnMakeChickens = document.getElementById('btn-make-chickens');
+        
+        // 判斷防呆顏色與按鈕解鎖
+        if (currentHeads === state.targetHeads) {
+            elHeads.className = 'status-perfect';
+            if(state.phase === 'setup') btnMakeChickens.disabled = false;
+        } else {
+            elHeads.className = currentHeads > state.targetHeads ? 'status-warning' : '';
+            btnMakeChickens.disabled = true;
+        }
+    }
+
+    /* ==========================================================================
+       4. 階段二：Calculate (假設全雞並計算)
+       ========================================================================== */
+    function triggerPhaseCalc() {
+        state.phase = 'calc';
+        
+        // 將所有空白頭換成小雞
+        state.animals = state.animals.map(() => 'chicken');
+        
+        // 禁用加減頭按鈕
+        document.getElementById('btn-add-head').disabled = true;
+        document.getElementById('btn-rm-head').disabled = true;
+        document.getElementById('btn-make-chickens').disabled = true;
+
+        togglePanels('panel-calc');
+        renderCanvas();
+    }
+
+    function verifyCalculation() {
+        const usedInput = parseInt(document.getElementById('input-used').value);
+        const remInput = parseInt(document.getElementById('input-rem').value);
+        
+        const expectedUsed = state.targetHeads * 2;
+        const expectedRem = state.targetLegs - expectedUsed;
+
+        if (usedInput === expectedUsed && remInput === expectedRem) {
+            // 計算正確，進入發放腳階段
+            alert('答對了！魔法陣解鎖，請將剩餘的腳發放給小雞吧！');
+            state.phase = 'distribute';
+            state.remainingLegPool = expectedRem;
+            togglePanels('panel-distribute');
+            renderCanvas();
+        } else {
+            // 計算錯誤
+            alert(`哎呀！算錯囉！\n提示：\n每隻小雞用掉 2 隻腳。\n總共有 ${state.targetLegs} 隻腳。`);
+        }
+    }
+
+    /* ==========================================================================
+       5. 階段三：Distribute (發放剩餘腳)
        ========================================================================== */
     function toggleAnimal(index) {
-        const currentType = state.animals[index];
-        if (currentType === 'blank') {
+        if (state.phase !== 'distribute') return;
+        
+        const animal = state.animals[index];
+        
+        if (animal === 'chicken') {
+            if (state.remainingLegPool >= 2) {
+                state.animals[index] = 'rabbit';
+                state.remainingLegPool -= 2;
+            } else {
+                alert('剩餘的腳不夠發給這隻小雞囉！');
+            }
+        } else if (animal === 'rabbit') {
+            // 收回腳，變回小雞
             state.animals[index] = 'chicken';
-        } else if (currentType === 'chicken') {
-            state.animals[index] = 'rabbit';
-        } else if (currentType === 'rabbit') {
-            state.animals[index] = 'chicken'; // 依照需求，兔子退化回小雞
+            state.remainingLegPool += 2;
         }
         renderCanvas();
     }
 
-    /* ==========================================================================
-       左側工具箱按鈕功能 (Toolbar Functions)
-       ========================================================================== */
-    // ➕ 召喚一個頭：推入一個空白狀態
-    function addHead() {
-        state.animals.push('blank');
-        renderCanvas();
-    }
-
-    // 🐔 全體變小雞：把所有的 'blank' 變成 'chicken'
-    function makeAllChickens() {
-        state.animals = state.animals.map(animal => 
-            animal === 'blank' ? 'chicken' : animal
-        );
-        renderCanvas();
-    }
-
-    // 🗑️ 清空重來：清空陣列
-    function clearCanvas() {
-        state.animals = [];
-        renderCanvas();
-    }
-
-    /* ==========================================================================
-       狀態列更新與防呆顏色邏輯 (Stats & Feedback Logic)
-       包含計算目前的頭腳總數，設定顏色，以及判斷過關條件。
-       ========================================================================== */
-    function updateStats() {
-        let currentHeads = state.animals.length;
-        let currentLegs = 0;
-
-        // 計算總腳數
-        state.animals.forEach(animal => {
-            if (animal === 'chicken') currentLegs += 2;
-            if (animal === 'rabbit') currentLegs += 4;
-        });
-
-        // 取得 DOM 元素
-        const elHeads = document.getElementById('current-heads');
-        const elLegs = document.getElementById('current-legs');
-        const iconHeads = document.getElementById('icon-heads');
-        const iconLegs = document.getElementById('icon-legs');
-        const btnFinish = document.getElementById('btn-finish');
-
-        // 更新數字文字
-        elHeads.textContent = currentHeads;
-        elLegs.textContent = currentLegs;
-
-        // 判斷顏色邏輯：頭數
-        if (currentHeads < state.targetHeads) {
-            elHeads.className = 'status-text';
-            iconHeads.textContent = '';
-        } else if (currentHeads === state.targetHeads) {
-            elHeads.className = 'status-perfect';
-            iconHeads.textContent = '✨';
+    function checkRevealFinalAnswer() {
+        // 當腳全部發放完畢 (pool === 0) 時，顯示輸入最終答案的區塊
+        const finalArea = document.getElementById('final-answer-area');
+        if (state.remainingLegPool === 0) {
+            finalArea.classList.remove('hidden');
         } else {
-            elHeads.className = 'status-warning';
-            iconHeads.textContent = '❌';
+            finalArea.classList.add('hidden');
         }
+    }
 
-        // 判斷顏色邏輯：腳數
-        if (currentLegs < state.targetLegs) {
-            elLegs.className = 'status-text';
-            iconLegs.textContent = '';
-        } else if (currentLegs === state.targetLegs) {
-            elLegs.className = 'status-perfect';
-            iconLegs.textContent = '✨';
-        } else {
-            elLegs.className = 'status-warning';
-            iconLegs.textContent = '❌';
-        }
+    function verifyFinalAnswer() {
+        const inputRabbits = parseInt(document.getElementById('ans-rabbits').value);
+        const inputChickens = parseInt(document.getElementById('ans-chickens').value);
 
-        // 判斷是否解鎖過關按鈕 (頭數和腳數同時達標)
-        const isWin = (currentHeads === state.targetHeads) && (currentLegs === state.targetLegs);
-        if (isWin) {
-            btnFinish.disabled = false;
-            btnFinish.classList.add('ready');
+        // 盤點畫面上實際的動物
+        const actualRabbits = state.animals.filter(a => a === 'rabbit').length;
+        const actualChickens = state.animals.filter(a => a === 'chicken').length;
+
+        if (inputRabbits === actualRabbits && inputChickens === actualChickens) {
+            // 寫入 Modal 變數並顯示
+            document.getElementById('res-rabbit').textContent = actualRabbits;
+            document.getElementById('res-chicken').textContent = actualChickens;
+            document.getElementById('success-modal').style.display = 'flex';
         } else {
-            btnFinish.disabled = true;
-            btnFinish.classList.remove('ready');
+            alert('數字不對喔！請仔細數數看草地上的兔子和小雞各有幾隻。');
         }
     }
 
     /* ==========================================================================
-       過關結算視窗邏輯 (Modal Logic)
+       6. 彈窗控制
        ========================================================================== */
-    function showModal() {
-        // 盤點草地上的真實動物數量
-        const chickens = state.animals.filter(a => a === 'chicken').length;
-        const rabbits = state.animals.filter(a => a === 'rabbit').length;
-
-        // 更新 Modal 內的文字
-        document.getElementById('result-chickens').textContent = chickens;
-        document.getElementById('result-rabbits').textContent = rabbits;
-
-        // 顯示 Modal
-        document.getElementById('success-modal').style.display = 'flex';
-    }
-
     function closeModalAndNext() {
-        // 隱藏 Modal
         document.getElementById('success-modal').style.display = 'none';
-        // 開始新遊戲
         startNewGame();
     }
 
-    /* ==========================================================================
-       遊戲初始化與重置 (Game Initialization)
-       ========================================================================== */
-    function startNewGame() {
-        clearCanvas();
-        generatePuzzle();
-        renderCanvas();
-    }
-
-    // 網頁載入完成後自動開始第一局
+    // 啟動遊戲
     window.onload = startNewGame;
 
 </script>
